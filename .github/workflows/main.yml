@@ -1,4 +1,4 @@
-name: Full Tunnel (ngrok)
+name: Full Tunnel (Zrok)
 
 on:
   workflow_dispatch:
@@ -21,26 +21,18 @@ jobs:
           curl -s http://localhost:8080/health || sleep 5
 
 
-      - name: Install localtunnel
-        run: npm install -g localtunnel
+      - name: Install And Enable zrok
+        run: curl -sSf https://get.openziti.io/install.bash | sudo bash -s zrok2 | zrok2 enable sM4ZzRRQP32N
 
 
       - name: Expose tunnel
         id: expose
         run: |
-          lt --port 8080 --subdomain mrgoodsilentcode > lt.log 2>&1 &
-          sleep 8
-
-          URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.loca\.lt' lt.log | head -n1)
-
-          echo "TUNNEL_URL=$URL" >> $GITHUB_OUTPUT
-          echo "::notice::Tunnel URL: $URL"
-          echo "TUNNEL_SERVER_URL = $URL"
-
-          sleep 21000
+          zrok2 share public 8080
+          sleep 10000
 
       - name: Cleanup
         if: always()
         run: |
           docker stop mhrv-tunnel || true
-          pkill ngrok || true
+          pkill zrok2 || true
