@@ -24,7 +24,11 @@ jobs:
       - name: Expose tunnel
         id: expose
         run: |
-          ssh -p 443 -R0:127.0.0.1:8080 qr@free.pinggy.io
+          ssh -p 443 \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -R0:localhost:8080 \
+            qr@free.pinggy.io
           sleep 10000
 
       - name: Cleanup
