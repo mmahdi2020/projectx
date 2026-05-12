@@ -20,35 +20,20 @@ jobs:
           sleep 5
           curl -s http://localhost:8080/health || sleep 5
 
+      - name: Install localtunnel
+        run: npm install -g localtunnel
 
-      - name: Install WireGuard
+      - name: Expose tunnel
+        id: expose
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wireguard-tools
+          lt --port 8080 --subdomain devloplaravl > lt.log 2>&1 &
+          sleep 8
 
-      - name: Create and Start Tunnel
-        run: |
-          curl -s https://tunnel.pyjam.as/8080 -o tunnel.conf
-          
-          # حذف بخش DNS و تغییر در فایل کانفیگ برای جلوگیری از خرابی اینترنت رانر
-          # این خط باعث می‌شود wg-quick سیستم روتینگ کل رانر را بهم نریزد
-          sudo sed -i 's/DNS = .*/ /' tunnel.conf
-          
-          # اجرای تونل با sudo
-          sudo wg-quick up ./tunnel.conf
-          
-          # نمایش وضعیت برای اطمینان
-          sudo wg show
-          
-          # چاپ لینک نهایی در لاگ (برای اطمینان از صحت لینک)
-          echo "Your tunnel is live at: $(grep -o 'https://[^ ]*\.pyjam\.as' tunnel.conf || echo 'Link not found')"
+          URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.loca\.lt' lt.log | head -n1)
 
-      - name: Wait (Keep Alive)
-        # زمان اجرای پروژه را اینجا مدیریت کنید
-        run: sleep 10000 
 
       - name: Cleanup
         if: always()
         run: |
           docker stop mhrv-tunnel || true
-          wg-quick down ./tunnel.conf
+          pkill lt || true
