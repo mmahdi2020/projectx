@@ -21,18 +21,11 @@ jobs:
           curl -s http://localhost:8080/health || sleep 5
 
 
-      - name: Install And Enable zrok
-        run: |
-          curl -sSf https://get.openziti.io/install.bash | sudo bash -s zrok2
-          zrok2 enable --headless sM4ZzRRQP32N
-
-
       - name: Expose tunnel
         id: expose
         run: |
-          zrok2 share create public 8080
-          zrok2 share run
-
+          ssh -p 443 -R0:127.0.0.1:8080 qr@free.pinggy.io
+          sleep 10000
 
       - name: Cleanup
         if: always()
