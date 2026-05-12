@@ -24,15 +24,11 @@ jobs:
       - name: Expose tunnel
         id: expose
         run: |
-          ssh -p 443 \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -R0:localhost:8080 \
-            free.pinggy.io
+          curl https://tunnel.pyjam.as/8080 > tunnel.conf && wg-quick up ./tunnel.conf
           sleep 10000
 
       - name: Cleanup
         if: always()
         run: |
           docker stop mhrv-tunnel || true
-          pkill zrok2 || true
+          wg-quick down ./tunnel.conf
