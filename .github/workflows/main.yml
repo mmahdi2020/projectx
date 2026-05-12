@@ -30,7 +30,7 @@ jobs:
       - name: Expose tunnel
         id: expose
         run: |
-          zrok2 share public 8080
+          zrok2 --headless share public 8080
           sleep 10000
 
       - name: Cleanup
