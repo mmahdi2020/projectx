@@ -24,7 +24,7 @@ jobs:
       - name: Install And Enable zrok
         run: |
           curl -sSf https://get.openziti.io/install.bash | sudo bash -s zrok2
-          zrok2 enable --token sM4ZzRRQP32N
+          zrok2 enable --headless sM4ZzRRQP32N
 
 
       - name: Expose tunnel
