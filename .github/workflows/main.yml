@@ -27,8 +27,10 @@ jobs:
 
       - name: Expose tunnel
         id: expose
+        env:
+          SUBDOM: ${{ secrets.SUBDOM }}
         run: |
-          lt --port 8080 > lt.log 2>&1 &
+          lt --port 8080 --subdomain SUBDOM> lt.log 2>&1 &
           sleep 8
 
           URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.loca\.lt' lt.log | head -n1)
