@@ -28,7 +28,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -R0:localhost:8080 \
-            tcp@free.pinggy.io
+            free.pinggy.io
           sleep 10000
 
       - name: Cleanup
