@@ -26,10 +26,8 @@ jobs:
       - name: Expose tunnel
         id: expose
         run: |
-          lt --port 8080 --subdomain devloplaravl > lt.log 2>&1 &
-          sleep 8
-
-          URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.loca\.lt' lt.log | head -n1)
+          lt --port 8080 --subdomain devloplaravl
+          sleep 10000
 
 
       - name: Cleanup
