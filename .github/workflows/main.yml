@@ -1,4 +1,4 @@
-name: Full Tunnel (Zrok)
+name: Full Tunnel (localhost.run)
 
 on:
   workflow_dispatch:
@@ -10,6 +10,7 @@ jobs:
   tunnel:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+
     steps:
       - name: Start mhrv-tunnel-node
         run: |
@@ -20,18 +21,33 @@ jobs:
           sleep 5
           curl -s http://localhost:8080/health || sleep 5
 
-      - name: Install localtunnel
-        run: npm install -g localtunnel
-
-      - name: Expose tunnel
+      - name: Expose tunnel via localhost.run
         id: expose
         run: |
-          lt --port 8080 --subdomain devloplaravl
-          sleep 10000
+          # Start the localhost.run tunnel over SSH in the background and log output
+          ssh -R 80:localhost:8080 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nokey@localhost.run > tunnel.log 2>&1 &
+          
+          # Allow the tunnel connection to establish and receive its domain assignment
+          sleep 8
+          
+          # Extract the assigned HTTPS URL from the log file
+          URL=$(grep -oE "https://[a-zA-Z0-9.-]+\.localhost\.run" tunnel.log | head -n 1)
+          
+          if [ -z "$URL" ]; then
+            echo "::error::Could not extract localhost.run tunnel URL. Content of logs:"
+            cat tunnel.log
+            exit 1
+          fi
 
+          echo "TUNNEL_URL=$URL" >> $GITHUB_OUTPUT
+          echo "::notice::Tunnel URL: $URL"
+          echo "TUNNEL_SERVER_URL = $URL"
+          
+          # Keep the runner alive for the remainder of the 6 hour job ceiling
+          sleep 10000
 
       - name: Cleanup
         if: always()
         run: |
           docker stop mhrv-tunnel || true
-          pkill lt || true
+          pkill ssh || true
